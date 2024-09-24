@@ -1,8 +1,11 @@
 const webpack = require('webpack');
 const path = require('path');
-const Dotenv = require('dotenv-webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const dotenv = require('dotenv');
+
+// Load environment variables from .env file
+dotenv.config();
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
@@ -41,11 +44,6 @@ module.exports = (env, argv) => {
     mode: isProduction ? 'production' : 'development',
     devtool: isProduction ? 'source-map' : 'eval-source-map',
     plugins: [
-      new Dotenv({
-        systemvars: true,
-        safe: true,
-        silent: true,
-      }),
       new HtmlWebpackPlugin({
         template: './index.html',
         filename: 'index.html',
@@ -64,9 +62,9 @@ module.exports = (env, argv) => {
         ],
       }),
       new webpack.DefinePlugin({
-        'process.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL || ''),
-        'process.env.SUPABASE_KEY': JSON.stringify(process.env.SUPABASE_KEY || ''),
-        'process.env.TEACHER_PASSWORD': JSON.stringify(process.env.TEACHER_PASSWORD || ''),
+        'process.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL),
+        'process.env.SUPABASE_KEY': JSON.stringify(process.env.SUPABASE_KEY),
+        'process.env.TEACHER_PASSWORD': JSON.stringify(process.env.TEACHER_PASSWORD),
       }),
     ],
   };

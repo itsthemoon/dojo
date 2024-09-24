@@ -1,11 +1,11 @@
-import * as confetti from 'canvas-confetti';
-import { createClient } from '@supabase/supabase-js';
+import * as confetti from "canvas-confetti";
+import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Supabase URL and Key are required');
+  throw new Error("Supabase URL and Key are required");
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -36,16 +36,23 @@ class ClassroomManagement {
   private confirmResetBtn: HTMLElement;
   private cancelResetBtn: HTMLElement;
   private giveAllPointsBtn: HTMLElement;
+  private audioContext: AudioContext | null = null;
+  private audioBuffer: AudioBuffer | null = null;
 
   constructor() {
-    this.isStudentView = document.body.classList.contains('student-view');
-    if (document.querySelector('body').contains(document.getElementById('studentGrid'))) {
+    this.isStudentView = document.body.classList.contains("student-view");
+    if (
+      document
+        .querySelector("body")
+        .contains(document.getElementById("studentGrid"))
+    ) {
       if (this.isStudentView) {
         this.initializeStudentPage();
       } else {
         this.initializeTeacherPage();
       }
     }
+    this.initAudio();
   }
 
   private initializeStudentPage() {
@@ -62,17 +69,19 @@ class ClassroomManagement {
     this.resetPointsBtn = document.getElementById("resetPointsBtn")!;
     this.logoutBtn = document.getElementById("logoutBtn")!;
     this.giveAllPointsBtn = document.getElementById("giveAllPointsBtn")!;
-    
-    const pointSoundElement = document.getElementById('pointSound');
+
+    const pointSoundElement = document.getElementById("pointSound");
     if (pointSoundElement instanceof HTMLAudioElement) {
       this.pointSound = pointSoundElement;
       this.pointSound.load(); // Preload the audio
     } else {
-      console.error('Point sound element not found or is not an audio element');
+      console.error("Point sound element not found or is not an audio element");
     }
-    
+
     this.loginOverlay = document.getElementById("loginOverlay")!;
-    this.passwordInput = document.getElementById("passwordInput") as HTMLInputElement;
+    this.passwordInput = document.getElementById(
+      "passwordInput"
+    ) as HTMLInputElement;
     this.loginButton = document.getElementById("loginButton")!;
     this.mainContent = document.getElementById("mainContent")!;
 
@@ -90,10 +99,18 @@ class ClassroomManagement {
     this.addStudentBtn?.addEventListener("click", () => this.openModal());
     this.submitStudentBtn?.addEventListener("click", () => this.addStudent());
     this.closeModalBtn?.addEventListener("click", () => this.closeModal());
-    this.resetPointsBtn?.addEventListener("click", () => this.showResetConfirmation());
-    this.giveAllPointsBtn?.addEventListener("click", () => this.giveAllStudentsOnePoint());
-    this.confirmResetBtn?.addEventListener("click", () => this.resetAllPoints());
-    this.cancelResetBtn?.addEventListener("click", () => this.closeResetConfirmation());
+    this.resetPointsBtn?.addEventListener("click", () =>
+      this.showResetConfirmation()
+    );
+    this.giveAllPointsBtn?.addEventListener("click", () =>
+      this.giveAllStudentsOnePoint()
+    );
+    this.confirmResetBtn?.addEventListener("click", () =>
+      this.resetAllPoints()
+    );
+    this.cancelResetBtn?.addEventListener("click", () =>
+      this.closeResetConfirmation()
+    );
     this.logoutBtn?.addEventListener("click", () => this.logout());
   }
 
@@ -172,9 +189,36 @@ class ClassroomManagement {
 
   private getAvatarOptions(selectedAvatar: string): string {
     const avatars = [
-      "😀", "😎", "🤓", "🧑‍🎓", "👩‍🎓", "👨‍🎓", "🦄", "🐶", "🐱", "🦊",
-      "🦁", "🐯", "🐸", "🐵", "🐼", "🐨", "🐷", "🐙", "🐬", "🦋",
-      "🦖", "🦕", "🚀", "🌈", "🍕", "🍦", "🎨", "🏀", "⚽", "🎸"
+      "😀",
+      "😎",
+      "🤓",
+      "🧑‍🎓",
+      "👩‍🎓",
+      "👨‍🎓",
+      "🦄",
+      "🐶",
+      "🐱",
+      "🦊",
+      "🦁",
+      "🐯",
+      "🐸",
+      "🐵",
+      "🐼",
+      "🐨",
+      "🐷",
+      "🐙",
+      "🐬",
+      "🦋",
+      "🦖",
+      "🦕",
+      "🚀",
+      "🌈",
+      "🍕",
+      "🍦",
+      "🎨",
+      "🏀",
+      "⚽",
+      "🎸",
     ];
     return avatars
       .map(
@@ -187,12 +231,15 @@ class ClassroomManagement {
   }
 
   private renderStudents(): void {
+    // Sort students alphabetically by name
+    this.students.sort((a, b) => a.name.localeCompare(b.name));
+
     this.studentGrid.innerHTML = "";
     this.students.forEach((student) => {
       const studentCard = document.createElement("div");
       studentCard.className = "student-card";
       studentCard.dataset.studentId = student.id;
-      
+
       if (this.isStudentView) {
         studentCard.innerHTML = `
           <div class="student-info">
@@ -236,11 +283,21 @@ class ClassroomManagement {
         const saveEditBtn = studentCard.querySelector(".save-edit");
         const deleteStudentBtn = studentCard.querySelector(".delete-student");
 
-        addPointBtn?.addEventListener("click", () => this.updatePoints(student.id, 1));
-        removePointBtn?.addEventListener("click", () => this.updatePoints(student.id, -1));
-        editIcon?.addEventListener("click", () => this.toggleEditMode(studentCard));
-        saveEditBtn?.addEventListener("click", () => this.saveStudentEdit(student.id, studentCard));
-        deleteStudentBtn?.addEventListener("click", () => this.deleteStudent(student.id));
+        addPointBtn?.addEventListener("click", () =>
+          this.updatePoints(student.id, 1)
+        );
+        removePointBtn?.addEventListener("click", () =>
+          this.updatePoints(student.id, -1)
+        );
+        editIcon?.addEventListener("click", () =>
+          this.toggleEditMode(studentCard)
+        );
+        saveEditBtn?.addEventListener("click", () =>
+          this.saveStudentEdit(student.id, studentCard)
+        );
+        deleteStudentBtn?.addEventListener("click", () =>
+          this.deleteStudent(student.id)
+        );
       }
 
       this.studentGrid.appendChild(studentCard);
@@ -358,26 +415,48 @@ class ClassroomManagement {
       this.renderStudents();
 
       if (change > 0) {
+        // Play sound before showing confetti
         await this.playPointSound();
         this.showConfetti();
       }
     }
   }
 
-  private async playPointSound(): Promise<void> {
+  private async initAudio(): Promise<void> {
+    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     try {
-      this.pointSound.currentTime = 0;
-      await this.pointSound.play();
+      const response = await fetch('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3');
+      const arrayBuffer = await response.arrayBuffer();
+      this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
     } catch (error) {
-      console.error('Error playing sound:', error);
+      console.error('Error initializing audio:', error);
     }
   }
 
+  private async playPointSound(): Promise<void> {
+    if (!this.audioContext || !this.audioBuffer) {
+      console.error('Audio not initialized');
+      return;
+    }
+
+    // Resume audio context if it's suspended
+    if (this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
+    }
+
+    const source = this.audioContext.createBufferSource();
+    source.buffer = this.audioBuffer;
+    source.connect(this.audioContext.destination);
+    source.start(0);
+  }
+
   private showConfetti(): void {
-    const canvas = document.getElementById('confetti-canvas') as HTMLCanvasElement;
+    const canvas = document.getElementById(
+      "confetti-canvas"
+    ) as HTMLCanvasElement;
     const myConfetti = confetti.create(canvas, {
       resize: true,
-      useWorker: true
+      useWorker: true,
     });
 
     const isMobile = window.innerWidth <= 768;
@@ -396,7 +475,7 @@ class ClassroomManagement {
       myConfetti({
         ...defaults,
         ...opts,
-        particleCount: Math.floor(count * particleRatio)
+        particleCount: Math.floor(count * particleRatio),
       });
     }
 
@@ -413,14 +492,14 @@ class ClassroomManagement {
       fire(0.35, {
         spread: 60,
         decay: 0.91,
-        scalar: 0.8
+        scalar: 0.8,
       });
 
       fire(0.1, {
         spread: 80,
         startVelocity: 15,
         decay: 0.92,
-        scalar: 1.2
+        scalar: 1.2,
       });
 
       fire(0.1, {
@@ -440,14 +519,14 @@ class ClassroomManagement {
       fire(0.35, {
         spread: 100,
         decay: 0.91,
-        scalar: 0.8
+        scalar: 0.8,
       });
 
       fire(0.1, {
         spread: 120,
         startVelocity: 25,
         decay: 0.92,
-        scalar: 1.2
+        scalar: 1.2,
       });
 
       fire(0.1, {
@@ -520,7 +599,10 @@ class ClassroomManagement {
         .eq("id", student.id);
 
       if (error) {
-        console.error(`Error resetting points for student ${student.id}:`, error);
+        console.error(
+          `Error resetting points for student ${student.id}:`,
+          error
+        );
       }
     }
 
@@ -542,7 +624,7 @@ class ClassroomManagement {
 
     // Reload students after giving points
     await this.loadStudents();
-    
+
     // Play sound and show confetti for all students
     await this.playPointSound();
     this.showConfetti();
@@ -555,10 +637,14 @@ class ClassroomManagement {
 }
 
 // Initialize the app
-document.addEventListener('DOMContentLoaded', () => {
-  if (document.querySelector('body').contains(document.getElementById('studentGrid'))) {
+document.addEventListener("DOMContentLoaded", () => {
+  if (
+    document
+      .querySelector("body")
+      .contains(document.getElementById("studentGrid"))
+  ) {
     const app = new ClassroomManagement();
-    if (document.body.classList.contains('student-view')) {
+    if (document.body.classList.contains("student-view")) {
       console.log("Student application initialized");
     } else {
       console.log("Teacher application initialized");
