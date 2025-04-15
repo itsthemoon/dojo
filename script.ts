@@ -38,6 +38,9 @@ class ClassroomManagement {
   private giveAllPointsBtn: HTMLElement;
   private audioContext: AudioContext | null = null;
   private audioBuffer: AudioBuffer | null = null;
+  private trexModeBtn: HTMLElement;
+  private isTrexModeActive: boolean = false;
+  private trexAudio: HTMLAudioElement | null = null;
 
   constructor() {
     this.isStudentView = document.body.classList.contains("student-view");
@@ -53,6 +56,8 @@ class ClassroomManagement {
       }
     }
     this.initAudio();
+    this.initializeTrexAudio();
+    this.addEventListeners();
   }
 
   private initializeStudentPage() {
@@ -69,6 +74,7 @@ class ClassroomManagement {
     this.resetPointsBtn = document.getElementById("resetPointsBtn")!;
     this.logoutBtn = document.getElementById("logoutBtn")!;
     this.giveAllPointsBtn = document.getElementById("giveAllPointsBtn")!;
+    this.trexModeBtn = document.getElementById("trexModeBtn")!;
 
     const pointSoundElement = document.getElementById("pointSound");
     if (pointSoundElement instanceof HTMLAudioElement) {
@@ -89,7 +95,6 @@ class ClassroomManagement {
     this.confirmResetBtn = document.getElementById("confirmResetBtn")!;
     this.cancelResetBtn = document.getElementById("cancelResetBtn")!;
 
-    this.addEventListeners();
     this.populateAvatarOptions();
     this.checkLoginStatus();
   }
@@ -112,6 +117,7 @@ class ClassroomManagement {
       this.closeResetConfirmation()
     );
     this.logoutBtn?.addEventListener("click", () => this.logout());
+    this.trexModeBtn?.addEventListener("click", () => this.toggleTrexMode());
   }
 
   private checkLoginStatus() {
@@ -423,24 +429,27 @@ class ClassroomManagement {
   }
 
   private async initAudio(): Promise<void> {
-    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    this.audioContext = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
     try {
-      const response = await fetch('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3');
+      const response = await fetch(
+        "https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"
+      );
       const arrayBuffer = await response.arrayBuffer();
       this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
     } catch (error) {
-      console.error('Error initializing audio:', error);
+      console.error("Error initializing audio:", error);
     }
   }
 
   private async playPointSound(): Promise<void> {
     if (!this.audioContext || !this.audioBuffer) {
-      console.error('Audio not initialized');
+      console.error("Audio not initialized");
       return;
     }
 
     // Resume audio context if it's suspended
-    if (this.audioContext.state === 'suspended') {
+    if (this.audioContext.state === "suspended") {
       await this.audioContext.resume();
     }
 
@@ -633,6 +642,27 @@ class ClassroomManagement {
   private logout(): void {
     localStorage.removeItem("loginTimestamp");
     this.showLoginOverlay();
+  }
+
+  private toggleTrexMode(): void {
+    this.isTrexModeActive = !this.isTrexModeActive;
+    if (this.isTrexModeActive) {
+      document.body.classList.add("trex-background");
+      this.trexModeBtn.textContent = "Exit T-Rex Mode";
+      this.trexAudio?.play();
+    } else {
+      document.body.classList.remove("trex-background");
+      this.trexModeBtn.textContent = "T-Rex Mode";
+      this.trexAudio?.pause();
+      if (this.trexAudio) {
+        this.trexAudio.currentTime = 0;
+      }
+    }
+  }
+
+  private initializeTrexAudio(): void {
+    this.trexAudio = new Audio("/public/Theme From Jurassic Park.mp3");
+    this.trexAudio.loop = true;
   }
 }
 

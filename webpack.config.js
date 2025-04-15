@@ -59,6 +59,7 @@ module.exports = (env, argv) => {
       new CopyWebpackPlugin({
         patterns: [
           { from: 'styles.css', to: 'styles.css' },
+          { from: 'public', to: 'public' },
         ],
       }),
       new webpack.DefinePlugin({

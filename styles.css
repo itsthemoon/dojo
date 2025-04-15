@@ -1,9 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap");
 
 :root {
-  --primary-color: #4FC3F7; /* Light blue */
-  --secondary-color: #40E0D0; /* Turquoise */
-  --accent-color: #FF69B4; /* Hot pink */
+  --primary-color: #4fc3f7; /* Light blue */
+  --secondary-color: #40e0d0; /* Turquoise */
+  --accent-color: #ff69b4; /* Hot pink */
   --background-color: #ecf0f1; /* Light Gray */
 }
 
@@ -519,4 +519,30 @@ canvas#confetti-canvas {
     width: 80%;
     text-align: center;
   }
+}
+
+/* T-Rex Mode Button and Background */
+.trex-mode-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--accent-color);
+  color: var(--background-color);
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 50px;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.trex-mode-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+.trex-background {
+  background-image: url("/public/trex.gif");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
