@@ -41,6 +41,7 @@ class ClassroomManagement {
   private trexModeBtn: HTMLElement;
   private isTrexModeActive: boolean = false;
   private trexAudio: HTMLAudioElement | null = null;
+  private trexVideo: HTMLVideoElement | null = null;
 
   constructor() {
     this.isStudentView = document.body.classList.contains("student-view");
@@ -75,6 +76,7 @@ class ClassroomManagement {
     this.logoutBtn = document.getElementById("logoutBtn")!;
     this.giveAllPointsBtn = document.getElementById("giveAllPointsBtn")!;
     this.trexModeBtn = document.getElementById("trexModeBtn")!;
+    this.trexVideo = document.getElementById("trexVideo") as HTMLVideoElement;
 
     const pointSoundElement = document.getElementById("pointSound");
     if (pointSoundElement instanceof HTMLAudioElement) {
@@ -646,22 +648,60 @@ class ClassroomManagement {
 
   private toggleTrexMode(): void {
     this.isTrexModeActive = !this.isTrexModeActive;
+
     if (this.isTrexModeActive) {
       document.body.classList.add("trex-background");
       this.trexModeBtn.textContent = "Exit T-Rex Mode";
-      this.trexAudio?.play();
+
+      // Play audio
+      this.trexAudio?.play().catch((e) => console.error("Audio error:", e));
+
+      // Play video
+      if (this.trexVideo) {
+        // Make video visible first
+        this.trexVideo.style.display = "block";
+
+        // Small timeout to ensure display change is processed
+        setTimeout(() => {
+          try {
+            // Force reload the video
+            this.trexVideo!.load();
+
+            // Try to play
+            const playPromise = this.trexVideo!.play();
+            if (playPromise !== undefined) {
+              playPromise.catch((e) => {
+                console.error("Video playback error:", e);
+                // If autoplay fails, at least the controls are visible for manual play
+                alert("Please click the play button to start the video");
+              });
+            }
+          } catch (err) {
+            console.error("Video error:", err);
+          }
+        }, 100);
+      }
     } else {
       document.body.classList.remove("trex-background");
       this.trexModeBtn.textContent = "T-Rex Mode";
+
+      // Stop audio
       this.trexAudio?.pause();
       if (this.trexAudio) {
         this.trexAudio.currentTime = 0;
+      }
+
+      // Stop video
+      if (this.trexVideo) {
+        this.trexVideo.pause();
+        this.trexVideo.currentTime = 0;
+        this.trexVideo.style.display = "none";
       }
     }
   }
 
   private initializeTrexAudio(): void {
-    this.trexAudio = new Audio("/public/Theme From Jurassic Park.mp3");
+    this.trexAudio = new Audio("public/Theme From Jurassic Park.mp3");
     this.trexAudio.loop = true;
   }
 }
