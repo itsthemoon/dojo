@@ -660,6 +660,9 @@ class ClassroomManagement {
       if (this.trexVideo) {
         // Make video visible first
         this.trexVideo.style.display = "block";
+        // Set the video source to the GitHub release URL
+        this.trexVideo.src =
+          "https://github.com/itsthemoon/dojo/releases/download/video/jurparkvideo.mp4";
 
         // Small timeout to ensure display change is processed
         setTimeout(() => {
@@ -701,7 +704,7 @@ class ClassroomManagement {
   }
 
   private initializeTrexAudio(): void {
-    this.trexAudio = new Audio("public/Theme From Jurassic Park.mp3");
+    this.trexAudio = new Audio("./public/Theme From Jurassic Park.mp3");
     this.trexAudio.loop = true;
   }
 }
