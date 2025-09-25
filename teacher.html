@@ -34,6 +34,18 @@
           <button id="resetPointsBtn">Reset All Points</button>
           <button id="giveAllPointsBtn">Give All +1 Point</button>
           <button id="addStudentBtn">Add Student</button>
+          <button id="toggleSelectionModeBtn" class="selection-mode-btn">Select Multiple</button>
+        </div>
+        <div class="bulk-controls" id="bulkControls" style="display: none;">
+          <div class="selection-controls">
+            <button id="selectAllBtn">Select All</button>
+            <button id="selectNoneBtn">Select None</button>
+            <span id="selectionCount">0 students selected</span>
+          </div>
+          <div class="bulk-point-controls">
+            <button id="bulkAddPointBtn" disabled>Add +1 Point to Selected</button>
+            <button id="bulkRemovePointBtn" disabled>Remove -1 Point from Selected</button>
+          </div>
         </div>
         <div id="studentGrid" class="student-grid">
           <!-- Students will be added here dynamically -->

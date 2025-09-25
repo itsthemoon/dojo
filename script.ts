@@ -1,5 +1,6 @@
 import * as confetti from "canvas-confetti";
 import { createClient } from "@supabase/supabase-js";
+import * as bcrypt from "bcryptjs";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
@@ -15,6 +16,24 @@ interface Student {
   name: string;
   avatar: string;
   points: number;
+  class_id?: string;
+}
+
+interface Class {
+  id: string;
+  class_name: string;
+  teacher_name: string;
+  teacher_emoji: string;
+  password_hash: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface SessionData {
+  class_id: string;
+  class_name: string;
+  teacher_name: string;
+  teacher_emoji: string;
 }
 
 class ClassroomManagement {
@@ -43,8 +62,29 @@ class ClassroomManagement {
   private trexAudio: HTMLAudioElement | null = null;
   private trexVideo: HTMLVideoElement | null = null;
 
+  // Bulk management controls
+  private toggleSelectionModeBtn: HTMLButtonElement;
+  private bulkControls: HTMLElement;
+  private selectAllBtn: HTMLButtonElement;
+  private selectNoneBtn: HTMLButtonElement;
+  private selectionCount: HTMLElement;
+  private bulkAddPointBtn: HTMLButtonElement;
+  private bulkRemovePointBtn: HTMLButtonElement;
+  private isSelectionModeActive: boolean = false;
+
+  private currentSession: SessionData | null = null;
+
   constructor() {
     this.isStudentView = document.body.classList.contains("student-view");
+
+    // Check for valid session first
+    this.currentSession = this.getSession();
+    if (!this.currentSession) {
+      // No valid session, redirect to homepage
+      window.location.href = 'index.html';
+      return;
+    }
+
     if (
       document
         .querySelector("body")
@@ -59,6 +99,7 @@ class ClassroomManagement {
     this.initAudio();
     this.initializeTrexAudio();
     this.addEventListeners();
+    this.updateClassContext();
   }
 
   private initializeStudentPage() {
@@ -77,6 +118,15 @@ class ClassroomManagement {
     this.giveAllPointsBtn = document.getElementById("giveAllPointsBtn")!;
     this.trexModeBtn = document.getElementById("trexModeBtn")!;
     this.trexVideo = document.getElementById("trexVideo") as HTMLVideoElement;
+
+    // Initialize bulk management controls
+    this.toggleSelectionModeBtn = document.getElementById("toggleSelectionModeBtn") as HTMLButtonElement;
+    this.bulkControls = document.getElementById("bulkControls")!;
+    this.selectAllBtn = document.getElementById("selectAllBtn") as HTMLButtonElement;
+    this.selectNoneBtn = document.getElementById("selectNoneBtn") as HTMLButtonElement;
+    this.selectionCount = document.getElementById("selectionCount")!;
+    this.bulkAddPointBtn = document.getElementById("bulkAddPointBtn") as HTMLButtonElement;
+    this.bulkRemovePointBtn = document.getElementById("bulkRemovePointBtn") as HTMLButtonElement;
 
     const pointSoundElement = document.getElementById("pointSound");
     if (pointSoundElement instanceof HTMLAudioElement) {
@@ -120,14 +170,19 @@ class ClassroomManagement {
     );
     this.logoutBtn?.addEventListener("click", () => this.logout());
     this.trexModeBtn?.addEventListener("click", () => this.toggleTrexMode());
+
+    // Bulk management event listeners
+    this.toggleSelectionModeBtn?.addEventListener("click", () => this.toggleSelectionMode());
+    this.selectAllBtn?.addEventListener("click", () => this.selectAllStudents());
+    this.selectNoneBtn?.addEventListener("click", () => this.selectNoneStudents());
+    this.bulkAddPointBtn?.addEventListener("click", () => this.bulkAddPoints());
+    this.bulkRemovePointBtn?.addEventListener("click", () => this.bulkRemovePoints());
   }
 
   private checkLoginStatus() {
-    if (this.isLoginValid()) {
-      this.showContent();
-    } else {
-      this.showLoginOverlay();
-    }
+    // Since we now have class-based authentication, and the constructor already checked for valid session,
+    // we can directly show the content for teacher view
+    this.showContent();
   }
 
   private isLoginValid(): boolean {
@@ -147,19 +202,12 @@ class ClassroomManagement {
 
   private login() {
     console.log("Login function called");
-    const password = this.passwordInput.value;
-    console.log("Entered password:", password);
-    if (password === process.env.TEACHER_PASSWORD) {
-      console.log("Password correct, setting login timestamp");
-      this.setLoginTimestamp();
-      console.log("Showing content");
-      this.showContent();
-    } else {
-      console.log("Incorrect password");
-      alert("Incorrect password. Please try again.");
-      this.passwordInput.value = "";
-      this.passwordInput.focus();
-    }
+    // Authentication is now handled at the class selection level
+    // Just show the content directly
+    console.log("Bypassing password check - authentication handled by class selection");
+    this.setLoginTimestamp();
+    console.log("Showing content");
+    this.showContent();
   }
 
   private showLoginOverlay() {
@@ -184,7 +232,15 @@ class ClassroomManagement {
   }
 
   private async loadStudents(): Promise<void> {
-    const { data, error } = await supabase.from("students").select("*");
+    if (!this.currentSession) {
+      console.error("No session found, cannot load students");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("students")
+      .select("*")
+      .eq("class_id", this.currentSession.class_id);
 
     if (error) {
       console.error("Error loading students:", error);
@@ -260,6 +316,11 @@ class ClassroomManagement {
         `;
       } else {
         studentCard.innerHTML = `
+          ${this.isSelectionModeActive ? `
+          <div class="student-checkbox">
+            <input type="checkbox" class="select-student" data-student-id="${student.id}">
+          </div>
+          ` : ''}
           <div class="student-info">
             <div class="student-avatar">${student.avatar}</div>
             <h3 class="student-name">${student.name}</h3>
@@ -290,6 +351,7 @@ class ClassroomManagement {
         const editIcon = studentCard.querySelector(".edit-icon");
         const saveEditBtn = studentCard.querySelector(".save-edit");
         const deleteStudentBtn = studentCard.querySelector(".delete-student");
+        const checkbox = studentCard.querySelector(".select-student") as HTMLInputElement;
 
         addPointBtn?.addEventListener("click", () =>
           this.updatePoints(student.id, 1)
@@ -306,6 +368,11 @@ class ClassroomManagement {
         deleteStudentBtn?.addEventListener("click", () =>
           this.deleteStudent(student.id)
         );
+
+        // Add checkbox change listener only in selection mode
+        if (this.isSelectionModeActive) {
+          checkbox?.addEventListener("change", () => this.updateSelectionCount());
+        }
       }
 
       this.studentGrid.appendChild(studentCard);
@@ -566,10 +633,16 @@ class ClassroomManagement {
     const avatar = avatarSelect.value;
 
     if (name) {
+      if (!this.currentSession) {
+        console.error("No session found, cannot add student");
+        return;
+      }
+
       const newStudent: Omit<Student, "id"> = {
         name: name,
         avatar: avatar,
         points: 0,
+        class_id: this.currentSession.class_id,
       };
 
       const { data, error } = await supabase
@@ -642,8 +715,9 @@ class ClassroomManagement {
   }
 
   private logout(): void {
-    localStorage.removeItem("loginTimestamp");
-    this.showLoginOverlay();
+    // Clear the session and redirect to class selection
+    this.clearSession();
+    window.location.href = 'index.html';
   }
 
   private toggleTrexMode(): void {
@@ -707,11 +781,611 @@ class ClassroomManagement {
     this.trexAudio = new Audio("./public/Theme From Jurassic Park.mp3");
     this.trexAudio.loop = true;
   }
+
+  private updateClassContext(): void {
+    if (!this.currentSession) return;
+
+    // Update page header with class information
+    const header = document.querySelector('header h1');
+    if (header) {
+      header.textContent = `${this.currentSession.class_name} - ${this.currentSession.teacher_name}`;
+    }
+
+    // Update teacher emoji if available
+    const teacherAvatar = document.querySelector('.teacher-avatar');
+    if (teacherAvatar && this.currentSession.teacher_emoji) {
+      teacherAvatar.textContent = this.currentSession.teacher_emoji;
+    }
+
+    // Add "Switch Class" button to header
+    this.addSwitchClassButton();
+  }
+
+  private addSwitchClassButton(): void {
+    const headerRight = document.querySelector('.header-right') || this.createHeaderRight();
+
+    const switchClassBtn = document.createElement('button');
+    switchClassBtn.textContent = 'Switch Class';
+    switchClassBtn.className = 'button switch-class-btn';
+    switchClassBtn.addEventListener('click', () => {
+      this.clearSession();
+      window.location.href = 'index.html';
+    });
+
+    headerRight.appendChild(switchClassBtn);
+  }
+
+  private createHeaderRight(): HTMLElement {
+    const headerRight = document.createElement('div');
+    headerRight.className = 'header-right';
+
+    const header = document.querySelector('header');
+    if (header) {
+      header.appendChild(headerRight);
+    }
+
+    return headerRight;
+  }
+
+  // Session Management
+  public getSession(): SessionData | null {
+    const sessionData = sessionStorage.getItem('dojoSession');
+    return sessionData ? JSON.parse(sessionData) : null;
+  }
+
+  public setSession(session: SessionData): void {
+    this.currentSession = session;
+    sessionStorage.setItem('dojoSession', JSON.stringify(session));
+  }
+
+  public clearSession(): void {
+    this.currentSession = null;
+    sessionStorage.removeItem('dojoSession');
+  }
+
+  // Class Management
+  public async getAllClasses(): Promise<Class[]> {
+    const { data, error } = await supabase
+      .from('classes')
+      .select('*')
+      .order('teacher_name');
+
+    if (error) {
+      console.error('Error fetching classes:', error);
+      throw error;
+    }
+
+    return data || [];
+  }
+
+  public async verifyAdminPassword(password: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('admin_passwords')
+      .select('password_hash')
+      .limit(1);
+
+    if (error || !data || data.length === 0) {
+      console.error('Error fetching admin password:', error);
+      return false;
+    }
+
+    return bcrypt.compareSync(password, data[0].password_hash);
+  }
+
+  public async verifyClassPassword(classId: string, password: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('classes')
+      .select('password_hash')
+      .eq('id', classId)
+      .single();
+
+    if (error || !data) {
+      console.error('Error fetching class password:', error);
+      return false;
+    }
+
+    return bcrypt.compareSync(password, data.password_hash);
+  }
+
+  public async createClass(teacherName: string, teacherEmoji: string, className: string, password: string): Promise<string> {
+    const passwordHash = bcrypt.hashSync(password, 12);
+
+    const { data, error } = await supabase
+      .from('classes')
+      .insert({
+        teacher_name: teacherName,
+        teacher_emoji: teacherEmoji,
+        class_name: className,
+        password_hash: passwordHash
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating class:', error);
+      throw error;
+    }
+
+    return data.id;
+  }
+
+  public async getClassById(classId: string): Promise<Class | null> {
+    const { data, error } = await supabase
+      .from('classes')
+      .select('*')
+      .eq('id', classId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching class:', error);
+      return null;
+    }
+
+    return data;
+  }
+
+  // Bulk Management Methods
+  private toggleSelectionMode(): void {
+    this.isSelectionModeActive = !this.isSelectionModeActive;
+
+    if (this.isSelectionModeActive) {
+      // Enable selection mode
+      this.toggleSelectionModeBtn.textContent = "Exit Selection";
+      this.toggleSelectionModeBtn.classList.add("active");
+      this.bulkControls.style.display = "block";
+
+      // Add selection mode class to body for styling
+      document.body.classList.add("selection-mode");
+    } else {
+      // Disable selection mode
+      this.toggleSelectionModeBtn.textContent = "Select Multiple";
+      this.toggleSelectionModeBtn.classList.remove("active");
+      this.bulkControls.style.display = "none";
+
+      // Remove selection mode class from body
+      document.body.classList.remove("selection-mode");
+
+      // Clear any selections
+      this.selectNoneStudents();
+    }
+
+    // Re-render students to show/hide checkboxes
+    this.renderStudents();
+  }
+
+  private selectAllStudents(): void {
+    const checkboxes = document.querySelectorAll('.select-student') as NodeListOf<HTMLInputElement>;
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = true;
+    });
+    this.updateSelectionCount();
+  }
+
+  private selectNoneStudents(): void {
+    const checkboxes = document.querySelectorAll('.select-student') as NodeListOf<HTMLInputElement>;
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = false;
+    });
+    this.updateSelectionCount();
+  }
+
+  private updateSelectionCount(): void {
+    const checkboxes = document.querySelectorAll('.select-student') as NodeListOf<HTMLInputElement>;
+    const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+
+    this.selectionCount.textContent = `${selectedCount} student${selectedCount !== 1 ? 's' : ''} selected`;
+
+    // Enable/disable bulk action buttons based on selection
+    const hasSelection = selectedCount > 0;
+    this.bulkAddPointBtn.disabled = !hasSelection;
+    this.bulkRemovePointBtn.disabled = !hasSelection;
+  }
+
+  private getSelectedStudentIds(): string[] {
+    const checkboxes = document.querySelectorAll('.select-student:checked') as NodeListOf<HTMLInputElement>;
+    return Array.from(checkboxes).map(cb => cb.dataset.studentId!);
+  }
+
+  private async bulkAddPoints(): Promise<void> {
+    const selectedIds = this.getSelectedStudentIds();
+    if (selectedIds.length === 0) return;
+
+    try {
+      for (const studentId of selectedIds) {
+        const student = this.students.find(s => s.id === studentId);
+        if (student) {
+          await this.updatePoints(studentId, 1);
+        }
+      }
+
+      // Clear selection after bulk operation
+      this.selectNoneStudents();
+
+      // Play celebration sound and confetti for bulk point addition
+      await this.playPointSound();
+      this.showConfetti();
+    } catch (error) {
+      console.error('Error adding bulk points:', error);
+    }
+  }
+
+  private async bulkRemovePoints(): Promise<void> {
+    const selectedIds = this.getSelectedStudentIds();
+    if (selectedIds.length === 0) return;
+
+    try {
+      for (const studentId of selectedIds) {
+        const student = this.students.find(s => s.id === studentId);
+        if (student) {
+          await this.updatePoints(studentId, -1);
+        }
+      }
+
+      // Clear selection after bulk operation
+      this.selectNoneStudents();
+    } catch (error) {
+      console.error('Error removing bulk points:', error);
+    }
+  }
+}
+
+// Class Selection Handler for Homepage
+class ClassSelectionHandler {
+  private studentClassSelect: HTMLSelectElement;
+  private teacherClassSelect: HTMLSelectElement;
+  private classPassword: HTMLInputElement;
+  private joinAsTeacher: HTMLButtonElement;
+  private joinAsStudent: HTMLButtonElement;
+  private createClassBtn: HTMLButtonElement;
+  private createClassModal: HTMLElement;
+  private closeCreateModal: HTMLElement;
+  private adminPassword: HTMLInputElement;
+  private teacherName: HTMLInputElement;
+  private teacherEmoji: HTMLSelectElement;
+  private className: HTMLInputElement;
+  private newClassPassword: HTMLInputElement;
+  private submitCreateClass: HTMLButtonElement;
+  private cancelCreateClass: HTMLButtonElement;
+
+  constructor() {
+    this.initializeElements();
+    this.bindEvents();
+    this.loadClasses();
+  }
+
+  private initializeElements(): void {
+    this.studentClassSelect = document.getElementById('studentClassSelect') as HTMLSelectElement;
+    this.teacherClassSelect = document.getElementById('teacherClassSelect') as HTMLSelectElement;
+    this.classPassword = document.getElementById('classPassword') as HTMLInputElement;
+    this.joinAsTeacher = document.getElementById('joinAsTeacher') as HTMLButtonElement;
+    this.joinAsStudent = document.getElementById('joinAsStudent') as HTMLButtonElement;
+    this.createClassBtn = document.getElementById('createClassBtn') as HTMLButtonElement;
+    this.createClassModal = document.getElementById('createClassModal') as HTMLElement;
+    this.closeCreateModal = document.getElementById('closeCreateModal') as HTMLElement;
+    this.adminPassword = document.getElementById('adminPassword') as HTMLInputElement;
+    this.teacherName = document.getElementById('teacherName') as HTMLInputElement;
+    this.teacherEmoji = document.getElementById('teacherEmoji') as HTMLSelectElement;
+    this.className = document.getElementById('className') as HTMLInputElement;
+    this.newClassPassword = document.getElementById('newClassPassword') as HTMLInputElement;
+    this.submitCreateClass = document.getElementById('submitCreateClass') as HTMLButtonElement;
+    this.cancelCreateClass = document.getElementById('cancelCreateClass') as HTMLButtonElement;
+  }
+
+  private bindEvents(): void {
+    this.joinAsTeacher.addEventListener('click', () => this.joinClass('teacher'));
+    this.joinAsStudent.addEventListener('click', () => this.joinClass('student'));
+    this.createClassBtn.addEventListener('click', () => this.openCreateModal());
+    this.closeCreateModal.addEventListener('click', () => this.closeCreateModalHandler());
+    this.cancelCreateClass.addEventListener('click', () => this.closeCreateModalHandler());
+
+    // Prevent form submission and handle click properly
+    this.submitCreateClass.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.handleCreateClass();
+    });
+
+    // Also handle Enter key in form fields
+    const formInputs = [this.adminPassword, this.teacherName, this.className, this.newClassPassword];
+    formInputs.forEach(input => {
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.handleCreateClass();
+        }
+      });
+    });
+
+    // Close modal when clicking outside
+    this.createClassModal.addEventListener('click', (e) => {
+      if (e.target === this.createClassModal) {
+        this.closeCreateModalHandler();
+      }
+    });
+  }
+
+  private async loadClasses(): Promise<void> {
+    try {
+      const { data, error } = await supabase
+        .from('classes')
+        .select('*')
+        .order('teacher_name');
+
+      if (error) throw error;
+
+      // Populate both dropdowns
+      this.studentClassSelect.innerHTML = '<option value="">Select a class...</option>';
+      this.teacherClassSelect.innerHTML = '<option value="">Select your class...</option>';
+
+      if (data && data.length > 0) {
+        data.forEach((cls: Class) => {
+          // Student dropdown option
+          const studentOption = document.createElement('option');
+          studentOption.value = cls.id;
+          studentOption.textContent = `${cls.teacher_name} - ${cls.class_name}`;
+          this.studentClassSelect.appendChild(studentOption);
+
+          // Teacher dropdown option
+          const teacherOption = document.createElement('option');
+          teacherOption.value = cls.id;
+          teacherOption.textContent = `${cls.teacher_name} - ${cls.class_name}`;
+          this.teacherClassSelect.appendChild(teacherOption);
+        });
+      } else {
+        this.studentClassSelect.innerHTML = '<option value="">No classes available</option>';
+        this.teacherClassSelect.innerHTML = '<option value="">No classes available</option>';
+      }
+    } catch (error) {
+      console.error('Error loading classes:', error);
+      this.showMessage('Error loading classes. Please refresh the page.', 'error');
+    }
+  }
+
+  private async joinClass(role: 'teacher' | 'student'): Promise<void> {
+    let classId: string;
+
+    if (role === 'teacher') {
+      classId = this.teacherClassSelect.value;
+      const password = this.classPassword.value;
+
+      if (!classId) {
+        this.showMessage('Please select your class.', 'error');
+        return;
+      }
+
+      if (!password) {
+        this.showMessage('Please enter the class password.', 'error');
+        return;
+      }
+
+      try {
+        // Verify password for teachers
+        const isValid = await this.verifyClassPassword(classId, password);
+        if (!isValid) {
+          this.showMessage('Incorrect password. Please try again.', 'error');
+          return;
+        }
+      } catch (error) {
+        console.error('Error verifying password:', error);
+        this.showMessage('Error verifying password. Please try again.', 'error');
+        return;
+      }
+    } else {
+      // Student - no password required
+      classId = this.studentClassSelect.value;
+
+      if (!classId) {
+        this.showMessage('Please select a class.', 'error');
+        return;
+      }
+    }
+
+    try {
+      // Get class details
+      const classData = await this.getClassById(classId);
+      if (!classData) {
+        this.showMessage('Class not found.', 'error');
+        return;
+      }
+
+      // Set session
+      const session: SessionData = {
+        class_id: classData.id,
+        class_name: classData.class_name,
+        teacher_name: classData.teacher_name,
+        teacher_emoji: classData.teacher_emoji
+      };
+
+      sessionStorage.setItem('dojoSession', JSON.stringify(session));
+
+      // Redirect based on role
+      if (role === 'teacher') {
+        window.location.href = 'teacher.html';
+      } else {
+        window.location.href = 'student.html';
+      }
+
+    } catch (error) {
+      console.error('Error joining class:', error);
+      this.showMessage('Error joining class. Please try again.', 'error');
+    }
+  }
+
+  private openCreateModal(): void {
+    this.createClassModal.style.display = 'block';
+    this.clearCreateForm();
+  }
+
+  private closeCreateModalHandler(): void {
+    this.createClassModal.style.display = 'none';
+    this.clearCreateForm();
+  }
+
+  private clearCreateForm(): void {
+    this.adminPassword.value = '';
+    this.teacherName.value = '';
+    this.teacherEmoji.value = '👩‍🏫';
+    this.className.value = '';
+    this.newClassPassword.value = '';
+  }
+
+  private setCreateButtonLoading(loading: boolean): void {
+    if (loading) {
+      this.submitCreateClass.disabled = true;
+      this.submitCreateClass.textContent = 'Creating Class...';
+      this.submitCreateClass.classList.add('loading');
+    } else {
+      this.submitCreateClass.disabled = false;
+      this.submitCreateClass.textContent = 'Create Class';
+      this.submitCreateClass.classList.remove('loading');
+    }
+  }
+
+  private async handleCreateClass(): Promise<void> {
+    // Prevent double-clicking
+    if (this.submitCreateClass.disabled) {
+      return;
+    }
+
+    const adminPwd = this.adminPassword.value;
+    const teacher = this.teacherName.value;
+    const teacherEmoji = this.teacherEmoji.value;
+    const className = this.className.value;
+    const classPwd = this.newClassPassword.value;
+
+    if (!adminPwd || !teacher || !teacherEmoji || !className || !classPwd) {
+      this.showMessage('Please fill in all fields.', 'error');
+      return;
+    }
+
+    // Disable button and show loading state
+    this.setCreateButtonLoading(true);
+
+    try {
+      // Verify admin password
+      const isAdminValid = await this.verifyAdminPassword(adminPwd);
+      if (!isAdminValid) {
+        this.showMessage('Invalid admin password.', 'error');
+        this.setCreateButtonLoading(false);
+        return;
+      }
+
+      // Create class
+      const classId = await this.createClass(teacher, teacherEmoji, className, classPwd);
+
+      this.showMessage('Class created successfully!', 'success');
+      this.closeCreateModalHandler();
+      this.loadClasses(); // Refresh the dropdown
+
+      // Auto-select the new class in the teacher dropdown
+      setTimeout(() => {
+        this.teacherClassSelect.value = classId;
+      }, 500);
+
+    } catch (error) {
+      console.error('Error creating class:', error);
+      this.showMessage('Error creating class. Please try again.', 'error');
+    } finally {
+      this.setCreateButtonLoading(false);
+    }
+  }
+
+  private async verifyAdminPassword(password: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('admin_passwords')
+      .select('password_hash')
+      .limit(1);
+
+    if (error || !data || data.length === 0) {
+      console.error('Error fetching admin password:', error);
+      return false;
+    }
+
+    return bcrypt.compareSync(password, data[0].password_hash);
+  }
+
+  private async verifyClassPassword(classId: string, password: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('classes')
+      .select('password_hash')
+      .eq('id', classId)
+      .single();
+
+    if (error || !data) {
+      console.error('Error fetching class password:', error);
+      return false;
+    }
+
+    return bcrypt.compareSync(password, data.password_hash);
+  }
+
+  private async createClass(teacherName: string, teacherEmoji: string, className: string, password: string): Promise<string> {
+    const passwordHash = bcrypt.hashSync(password, 12);
+
+    const { data, error } = await supabase
+      .from('classes')
+      .insert({
+        teacher_name: teacherName,
+        teacher_emoji: teacherEmoji,
+        class_name: className,
+        password_hash: passwordHash
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating class:', error);
+      throw error;
+    }
+
+    return data.id;
+  }
+
+  private async getClassById(classId: string): Promise<Class | null> {
+    const { data, error } = await supabase
+      .from('classes')
+      .select('*')
+      .eq('id', classId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching class:', error);
+      return null;
+    }
+
+    return data;
+  }
+
+  private showMessage(message: string, type: 'success' | 'error'): void {
+    const existingMessage = document.querySelector('.success-message, .error-message');
+    if (existingMessage) {
+      existingMessage.remove();
+    }
+
+    const messageEl = document.createElement('div');
+    messageEl.className = `${type}-message`;
+    messageEl.textContent = message;
+
+    const container = document.querySelector('.class-selection-container');
+    if (container) {
+      container.insertBefore(messageEl, container.firstChild);
+
+      setTimeout(() => {
+        messageEl.remove();
+      }, 5000);
+    }
+  }
 }
 
 // Initialize the app
 document.addEventListener("DOMContentLoaded", () => {
-  if (
+  // Check if we're on the class selection page (homepage)
+  if (document.getElementById('classSelection')) {
+    new ClassSelectionHandler();
+    console.log('Class selection handler initialized');
+  }
+  // Check if we're on the classroom management pages (teacher/student)
+  else if (
     document
       .querySelector("body")
       .contains(document.getElementById("studentGrid"))

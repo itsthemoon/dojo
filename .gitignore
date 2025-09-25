@@ -41,6 +41,4 @@ Thumbs.db
 !webpack.config.js
 !babel.config.js
 
-# Dependency lock files (uncomment if you want to ignore them)
-# package-lock.json
-# yarn.lock
+*.md
