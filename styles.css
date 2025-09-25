@@ -550,6 +550,8 @@ canvas#confetti-canvas {
   border-radius: 50px;
   z-index: 1000;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  /* Hidden by default - remove 'display: none;' to re-enable */
+  display: none;
 }
 
 .trex-mode-btn:hover {
