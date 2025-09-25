@@ -275,17 +275,21 @@ button:hover {
   width: 100%;
   height: 100%;
   background-color: rgba(76, 195, 247, 0.8);
+  overflow-y: auto;
+  padding: 20px 0;
+  box-sizing: border-box;
 }
 
 .modal-content {
   background-color: var(--background-color);
   color: var(--primary-color);
-  margin: 10% auto;
+  margin: 0 auto;
   padding: 20px;
   border: none;
   border-radius: 20px;
   width: 90%;
   max-width: 400px;
+  position: relative;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
@@ -299,6 +303,19 @@ button:hover {
   border-radius: 10px;
   font-family: "Comic Neue", cursive;
   font-size: 16px;
+}
+
+/* Special styling for teacher emoji selector */
+#teacherEmoji {
+  font-size: 18px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+#teacherEmoji option {
+  padding: 8px;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 .modal-content button {
@@ -553,4 +570,456 @@ canvas#confetti-canvas {
   z-index: -1;
   object-fit: cover;
   display: none;
+}
+
+/* Class Selection Styles */
+.class-selection-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.selection-option {
+  background-color: white;
+  border-radius: 15px;
+  padding: 35px 40px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.selection-option h3 {
+  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.selection-option p {
+  color: var(--primary-color);
+  margin: 10px 0 20px 0;
+  font-size: 14px;
+  opacity: 0.8;
+  line-height: 1.4;
+}
+
+.divider {
+  text-align: center;
+  position: relative;
+  margin: 30px 0;
+}
+
+.divider span {
+  background-color: var(--background-color);
+  padding: 0 20px;
+  color: var(--primary-color);
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  z-index: -1;
+}
+
+#studentClassSelect, #teacherClassSelect, #classPassword {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px;
+  margin: 10px auto;
+  border: 2px solid var(--primary-color);
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: "Comic Neue", cursive;
+  box-sizing: border-box;
+  background-color: white;
+  color: var(--primary-color);
+  cursor: pointer;
+  display: block;
+}
+
+#studentClassSelect:focus, #teacherClassSelect:focus, #classPassword:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 5px rgba(64, 224, 208, 0.3);
+}
+
+#studentClassSelect:hover, #teacherClassSelect:hover {
+  border-color: var(--secondary-color);
+}
+
+/* Style the dropdown arrow */
+#studentClassSelect, #teacherClassSelect {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg fill='%234fc3f7' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+
+/* Dropdown option styling */
+#studentClassSelect option, #teacherClassSelect option {
+  padding: 10px;
+  background-color: white;
+  color: var(--primary-color);
+  font-family: "Comic Neue", cursive;
+}
+
+#studentClassSelect option:hover, #teacherClassSelect option:hover {
+  background-color: var(--background-color);
+}
+
+/* Better spacing for form elements in selection options */
+.selection-option select {
+  margin-bottom: 20px;
+}
+
+.selection-option input[type="password"] {
+  margin-top: 10px;
+  margin-bottom: 25px;
+}
+
+.selection-option button {
+  margin: 15px auto 5px auto;
+  display: block;
+  min-width: 180px;
+}
+
+.role-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.button.secondary {
+  background-color: var(--secondary-color);
+  color: var(--background-color);
+}
+
+.button.secondary:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+/* Modal Enhancements */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 10px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: var(--primary-color);
+}
+
+.close-button {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--primary-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.close-button:hover {
+  color: var(--accent-color);
+}
+
+.modal-body {
+  margin: 20px 0;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--primary-color);
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: "Comic Neue", cursive;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 5px rgba(64, 224, 208, 0.3);
+}
+
+.modal-footer {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.modal-footer button {
+  min-width: 120px;
+}
+
+/* Loading State */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Error Messages */
+.error-message {
+  color: var(--accent-color);
+  background-color: rgba(255, 105, 180, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Success Messages */
+.success-message {
+  color: var(--secondary-color);
+  background-color: rgba(64, 224, 208, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Switch Class Button */
+.switch-class-btn {
+  background-color: var(--accent-color) !important;
+  color: var(--background-color) !important;
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  border-radius: 8px !important;
+  margin-left: 10px;
+}
+
+.switch-class-btn:hover {
+  background-color: var(--secondary-color) !important;
+  transform: translateY(-1px);
+}
+
+/* Header Right Container */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Bulk Management Controls */
+.bulk-controls {
+  background-color: rgba(76, 195, 247, 0.1);
+  border: 2px solid var(--primary-color);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.selection-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bulk-point-controls {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#selectionCount {
+  color: var(--primary-color);
+  font-weight: bold;
+  background-color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  border: 2px solid var(--primary-color);
+  font-size: 14px;
+}
+
+#selectAllBtn, #selectNoneBtn {
+  background-color: var(--secondary-color);
+  color: var(--background-color);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Comic Neue", cursive;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+#selectAllBtn:hover, #selectNoneBtn:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+#bulkAddPointBtn, #bulkRemovePointBtn {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Comic Neue", cursive;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+#bulkAddPointBtn:hover:not(:disabled) {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+#bulkRemovePointBtn:hover:not(:disabled) {
+  background-color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+#bulkAddPointBtn:disabled, #bulkRemovePointBtn:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Selection Mode Toggle Button */
+.selection-mode-btn {
+  background-color: var(--secondary-color) !important;
+  color: var(--background-color) !important;
+  border: 2px solid var(--secondary-color) !important;
+  transition: all 0.3s ease !important;
+}
+
+.selection-mode-btn:hover {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  transform: translateY(-2px) !important;
+}
+
+.selection-mode-btn.active {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 4px 8px rgba(255, 105, 180, 0.3) !important;
+}
+
+/* Student Card Checkbox Styling */
+.student-checkbox {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+}
+
+.student-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  transform: scale(1.2);
+  accent-color: var(--primary-color);
+}
+
+.student-card {
+  position: relative;
+}
+
+/* Adjust student card padding to accommodate checkbox only in selection mode */
+body.selection-mode .student-card:not(.student-view .student-card) {
+  padding-left: 45px;
+}
+
+/* Hide bulk controls by default */
+.bulk-controls {
+  display: none;
+}
+
+/* Show bulk controls in selection mode */
+body.selection-mode .bulk-controls {
+  display: flex !important;
+}
+
+/* Responsive Design for Class Selection */
+@media (max-width: 768px) {
+  .class-selection-container {
+    padding: 10px;
+  }
+
+  .selection-option {
+    padding: 20px;
+  }
+
+  .role-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .role-buttons button {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .header-right {
+    margin-top: 10px;
+  }
+
+  .switch-class-btn {
+    font-size: 12px !important;
+    padding: 6px 12px !important;
+  }
+
+  /* Bulk controls responsive */
+  .bulk-controls {
+    padding: 15px;
+  }
+
+  .selection-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bulk-point-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #bulkAddPointBtn, #bulkRemovePointBtn {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+  }
 }
