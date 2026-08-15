@@ -328,7 +328,7 @@ export function TeacherBoard({ classId, onExit }: TeacherBoardProps) {
         </div>
       )}
 
-      <EggOverlays trexOn={eggs.trexOn} partyOn={eggs.partyOn} />
+      <EggOverlays trexGifOn={eggs.trexGifOn} partyOn={eggs.partyOn} />
     </div>
   );
 }

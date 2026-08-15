@@ -154,7 +154,7 @@ export function DisplayBoard({ classId, onExit }: DisplayBoardProps) {
         </div>
       )}
 
-      <EggOverlays trexOn={eggs.trexOn} partyOn={eggs.partyOn} />
+      <EggOverlays trexGifOn={eggs.trexGifOn} partyOn={eggs.partyOn} />
     </div>
   );
 }
