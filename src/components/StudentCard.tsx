@@ -58,12 +58,12 @@ export function StudentCard({
         {student.avatar}
       </span>
       <span className="card__name">{student.name}</span>
-      <span key={pop?.key ?? "stars"} className="card__stars">
+      <span key={pop ? `stars-${pop.key}` : "stars"} className="card__stars">
         <span aria-hidden="true">⭐</span>
         <span>{points}</span>
       </span>
       {pop && (
-        <span key={pop.key} className="card__float" aria-hidden="true">
+        <span key={`float-${pop.key}`} className="card__float" aria-hidden="true">
           +{pop.delta}
         </span>
       )}
