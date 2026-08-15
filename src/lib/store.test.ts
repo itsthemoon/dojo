@@ -198,4 +198,20 @@ describe("store", () => {
 
     expect(adoptCloudState("not json", rev + 20)).toBe(false);
   });
+
+  it("never lets a cloud write remove or swap a known class password", () => {
+    const cls = createClass("K", "T", "⭐", "pbkdf2$1$salt$realhash");
+    const stripped = {
+      ...JSON.parse(JSON.stringify(getState())),
+      rev: getState().rev + 10,
+      classes: getState().classes.map((c) => ({ ...c, passwordHash: "pbkdf2$1$evil$attackerhash" })),
+    };
+
+    expect(adoptCloudState(JSON.stringify(stripped), stripped.rev)).toBe(true);
+    expect(getState().classes.find((c) => c.id === cls.id)?.passwordHash).toBe("pbkdf2$1$salt$realhash");
+
+    const removed = { ...stripped, rev: stripped.rev + 1, classes: stripped.classes.map((c: Record<string, unknown>) => ({ ...c, passwordHash: undefined })) };
+    expect(adoptCloudState(JSON.stringify(removed), removed.rev)).toBe(true);
+    expect(getState().classes.find((c) => c.id === cls.id)?.passwordHash).toBe("pbkdf2$1$salt$realhash");
+  });
 });

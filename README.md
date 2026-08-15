@@ -31,18 +31,27 @@ On top of that, **cloud sync** mirrors every change to a Firebase Firestore docu
 
 1. Go to https://console.firebase.google.com → **Create a project** (name it anything, e.g. `star-catcher`; Analytics off is fine).
 2. In the project: **Build → Firestore Database → Create database** → Start in **production mode** → pick a US region.
-3. Firestore → **Rules** tab → replace with the following and **Publish** (these do not expire, unlike test mode):
+3. Firestore → **Rules** tab → replace with the following and **Publish** (these do not expire, unlike test mode). `get/create/update` only — no `list` (documents can't be enumerated) and no `delete`:
 
    ```
    rules_version = '2';
    service cloud.firestore {
      match /databases/{database}/documents {
        match /boards/{board} {
-         allow read, write: if true;
+         allow get, create, update: if true;
        }
      }
    }
    ```
+
+### Trust model (read this once)
+
+There is no sign-in. Anyone who inspects this public site's source can technically reach the
+Firestore document and edit board data — the same trust model as the original Supabase version.
+The class password gates the *teacher UI* (kids at the smartboard, curious students), not the
+network; a device that already knows a class's password will also refuse any cloud update that
+tries to remove or change it. If real per-teacher accounts are ever needed, wire Firebase Auth
+and scope documents to `request.auth.uid`.
 
 4. Project settings (gear icon) → **Your apps** → Web (`</>`) → register an app (no hosting) → copy the `firebaseConfig` object.
 5. Paste it into `src/lib/firebase-config.ts` (replacing `null`), commit, push. The config values are public identifiers — safe to commit.

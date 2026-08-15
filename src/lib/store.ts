@@ -460,6 +460,17 @@ export function adoptCloudState(json: string, remoteRev: number): boolean {
   if (!Number.isFinite(remoteRev) || remoteRev <= state.rev) return false;
   try {
     const next = normalizeState(JSON.parse(json));
+    // Local defense: a cloud write can update board data, but it can never
+    // remove or swap the password gate of a class this device already knows.
+    // (There is no change-password flow, so a differing remote hash is never
+    // legitimate.)
+    const localHashes = new Map(
+      state.classes.filter((c) => c.passwordHash).map((c) => [c.id, c.passwordHash!])
+    );
+    next.classes = next.classes.map((c) => {
+      const local = localHashes.get(c.id);
+      return local && c.passwordHash !== local ? { ...c, passwordHash: local } : c;
+    });
     state = { ...next, rev: remoteRev };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
