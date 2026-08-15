@@ -1,44 +1,24 @@
-# Node.js
+# Dependencies
 node_modules/
-npm-debug.log
-yarn-error.log
 
 # Build output
 dist/
-build/
 
-# Environment variables
+# Environment (legacy — the app no longer needs env vars)
 .env
 .env.local
-.env.*.local
 
-# IDE and editor files
+# IDE / editor
 .vscode/
 .idea/
 *.swp
-*.swo
-*~
 
-# OS generated files
+# OS
 .DS_Store
-Thumbs.db
 
 # Logs
 *.log
 
-# Temporary files
-*.tmp
-*.temp
-
-# TypeScript
-*.tsbuildinfo
-
-# Compiled JavaScript (if you're compiling TypeScript)
-*.js
-*.js.map
-
-# Exclude specific JavaScript files that should be versioned
-!webpack.config.js
-!babel.config.js
-
-*.md
+# Local notes
+plan.md
+CLAUDE.local.md

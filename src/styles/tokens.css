@@ -1,0 +1,56 @@
+/* ---------------------------------------------------------------------------
+   Star Board design tokens — "digital sticker chart"
+   Palette: a crayon box on warm construction paper.
+--------------------------------------------------------------------------- */
+:root {
+  /* Surfaces */
+  --paper: #fff8ed;
+  --paper-dot: #f0e5d2;
+  --card: #ffffff;
+  --card-edge: rgba(42, 51, 82, 0.08);
+
+  /* Ink */
+  --ink: #2a3352;
+  --ink-soft: #687192;
+  --ink-faint: #9aa1bd;
+
+  /* Crayons */
+  --star: #ffc531;
+  --star-deep: #ef9d10;
+  --blue: #4d9de0;
+  --green: #57b87b;
+  --pink: #f26d9c;
+  --purple: #8d6fd1;
+  --orange: #f49d37;
+  --red: #ef6461;
+  --teal: #2bb3a3;
+
+  /* Action colors (darker than the crayons: these carry text, so they must pass AA) */
+  --primary: #2a72b3;
+  --primary-ink: #ffffff;
+  --danger: #c93f3c;
+
+  /* Type */
+  --font-display: "Fredoka Variable", "Fredoka", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+
+  /* Shape */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(42, 51, 82, 0.06), 0 2px 8px -2px rgba(42, 51, 82, 0.08);
+  --shadow-md: 0 2px 4px rgba(42, 51, 82, 0.06), 0 10px 24px -10px rgba(42, 51, 82, 0.18);
+  --shadow-lg: 0 4px 8px rgba(42, 51, 82, 0.08), 0 24px 48px -16px rgba(42, 51, 82, 0.28);
+  --sticker-ring: 0 0 0 3px #ffffff;
+
+  /* Motion (strong curves — built-in CSS easings are too weak) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --t-press: 140ms;
+  --t-fast: 180ms;
+  --t-med: 240ms;
+}

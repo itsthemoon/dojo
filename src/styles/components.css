@@ -1,0 +1,1196 @@
+/* ===========================================================================
+   Buttons
+=========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 540;
+  font-size: 15px;
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--card-edge);
+  transition: transform var(--t-press) var(--ease-out), box-shadow var(--t-press) var(--ease-out),
+    background-color var(--t-press) ease;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.btn--primary {
+  background: var(--primary);
+  border-color: transparent;
+  color: var(--primary-ink);
+}
+
+.btn--star {
+  background: var(--star);
+  border-color: transparent;
+  color: var(--ink);
+}
+
+.btn--danger {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--danger);
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--ink-soft);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn--ghost:hover,
+  .btn--danger:hover {
+    box-shadow: none;
+    background: rgba(42, 51, 82, 0.06);
+  }
+}
+
+.btn--lg {
+  font-size: 17px;
+  padding: 13px 24px;
+  border-radius: var(--radius-lg);
+}
+
+.btn--icon {
+  padding: 10px;
+  border-radius: var(--radius-pill);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+
+/* ===========================================================================
+   Header with bulletin-board scallop trim (the signature)
+=========================================================================== */
+.header {
+  position: relative;
+  background: var(--card);
+  padding: 18px 24px 26px;
+  box-shadow: var(--shadow-sm);
+}
+
+.header::after {
+  /* scalloped border trim, like the edge of a classroom bulletin board */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -13px;
+  height: 14px;
+  background-image: radial-gradient(circle at 50% 0, var(--card) 12px, transparent 13px);
+  background-size: 28px 14px;
+  background-repeat: repeat-x;
+  filter: drop-shadow(0 2px 1px rgba(42, 51, 82, 0.07));
+  pointer-events: none;
+}
+
+.header__row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header__emoji {
+  font-size: 34px;
+  line-height: 1;
+  background: var(--paper);
+  border-radius: var(--radius-pill);
+  padding: 10px;
+  box-shadow: inset 0 0 0 2px var(--card-edge);
+  border: none;
+}
+
+/* Only the teacher view's emoji is a button (the wave easter egg). */
+button.header__emoji {
+  cursor: pointer;
+  transition: transform var(--t-press) var(--ease-out);
+}
+
+button.header__emoji:active {
+  transform: scale(0.94);
+}
+
+.header__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.header__title {
+  font-size: clamp(22px, 3.4vw, 30px);
+  font-weight: 620;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header__subtitle {
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===========================================================================
+   Storage warning banner
+=========================================================================== */
+.storage-warning {
+  max-width: 1200px;
+  margin: 24px auto -8px;
+  padding: 12px 18px;
+  background: #fdecec;
+  color: var(--danger);
+  border: 2px solid var(--danger);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* ===========================================================================
+   Star Jar
+=========================================================================== */
+.starjar {
+  max-width: 1200px;
+  margin: 26px auto 0;
+  padding: 0 24px;
+}
+
+.starjar__frame {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  padding: 8px 16px 8px 10px;
+}
+
+.starjar__label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.starjar__track {
+  flex: 1;
+  height: 16px;
+  background: var(--paper);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(42, 51, 82, 0.12);
+}
+
+.starjar__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--star) 0%, var(--star-deep) 100%);
+  transition: width 600ms var(--ease-in-out);
+  min-width: 0;
+}
+
+.starjar__count {
+  font-family: var(--font-display);
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.starjar__parties {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* ===========================================================================
+   Board layout
+=========================================================================== */
+.board {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 24px 120px;
+}
+
+.board__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0 22px;
+}
+
+.board__spacer {
+  flex: 1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(164px, 1fr));
+  gap: 16px;
+}
+
+.grid--display {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+/* ===========================================================================
+   Student cards — die-cut stickers on the board
+=========================================================================== */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--sticker-ring), var(--shadow-sm);
+  padding: 18px 12px 14px;
+  border: none;
+  text-align: center;
+  transition: transform var(--t-press) var(--ease-out), box-shadow var(--t-press) var(--ease-out);
+  flex: 1;
+  min-width: 0;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+}
+
+button.card {
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sticker-ring), var(--shadow-md);
+  }
+
+  button.card--selected:hover {
+    box-shadow: 0 0 0 3px var(--blue), var(--shadow-md);
+  }
+}
+
+button.card:active {
+  transform: scale(0.97);
+}
+
+.card--selected {
+  box-shadow: 0 0 0 3px var(--blue), var(--shadow-md);
+}
+
+.card__check {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: var(--blue);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pop-in 200ms var(--ease-bounce) backwards;
+}
+
+.card__edit {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 14px;
+  padding: 6px;
+  border-radius: var(--radius-pill);
+  color: var(--ink-faint);
+  opacity: 0;
+  transition: opacity var(--t-fast) ease, background-color var(--t-fast) ease, transform var(--t-press) var(--ease-out);
+}
+
+.card-wrap {
+  position: relative;
+  display: flex;
+  animation: card-in 320ms var(--ease-out) backwards;
+}
+
+.card__edit:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-wrap:hover .card__edit {
+    opacity: 1;
+  }
+
+  .card__edit:hover {
+    background: rgba(42, 51, 82, 0.07);
+  }
+}
+
+@media (hover: none) {
+  .card__edit {
+    opacity: 0.6;
+  }
+}
+
+.card__edit:active {
+  transform: scale(0.92);
+}
+
+.card__avatar {
+  font-size: 46px;
+  line-height: 1;
+  width: 76px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: hsl(var(--hue, 45) 85% 92%);
+  box-shadow: inset 0 0 0 2.5px hsl(var(--hue, 45) 55% 82%);
+}
+
+.card__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card__stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-display);
+  font-weight: 620;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  background: var(--paper);
+  border-radius: var(--radius-pill);
+  padding: 3px 12px;
+  box-shadow: inset 0 0 0 2px var(--card-edge);
+}
+
+.card--pop .card__stars {
+  animation: star-pop 360ms var(--ease-bounce);
+}
+
+@keyframes star-pop {
+  35% {
+    transform: scale(1.22);
+    background: var(--star);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+/* floating +1 above a card */
+.card__float {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  font-family: var(--font-display);
+  font-weight: 640;
+  font-size: 19px;
+  color: var(--star-deep);
+  pointer-events: none;
+  animation: float-up 800ms var(--ease-out) forwards;
+}
+
+@keyframes float-up {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px) scale(0.8);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -6px) scale(1.05);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -34px) scale(1);
+  }
+}
+
+/* wave easter egg */
+.card--wave {
+  animation: wave-bounce 500ms var(--ease-bounce);
+}
+
+@keyframes wave-bounce {
+  35% {
+    transform: translateY(-14px) rotate(-2deg);
+  }
+  70% {
+    transform: translateY(2px) rotate(1deg);
+  }
+}
+
+/* ===========================================================================
+   Empty state
+=========================================================================== */
+.empty {
+  text-align: center;
+  padding: 70px 20px;
+  color: var(--ink-soft);
+}
+
+.empty__emoji {
+  font-size: 52px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.empty h2 {
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+/* ===========================================================================
+   Modals & sheets
+=========================================================================== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(42, 51, 82, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+  animation: fade-in var(--t-fast) ease backwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.sheet {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 520px;
+  max-height: min(86vh, 720px);
+  overflow-y: auto;
+  padding: 24px;
+  animation: sheet-in var(--t-fast) var(--ease-out) backwards;
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+}
+
+.sheet--wide {
+  max-width: 640px;
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.sheet__title {
+  font-size: 21px;
+  flex: 1;
+}
+
+.sheet__close {
+  font-size: 15px;
+  color: var(--ink-soft);
+  padding: 8px 10px;
+  border-radius: var(--radius-pill);
+  transition: background-color var(--t-fast) ease, transform var(--t-press) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sheet__close:hover {
+    background: rgba(42, 51, 82, 0.07);
+  }
+}
+
+.sheet__close:active {
+  transform: scale(0.94);
+}
+
+.sheet__footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+/* ===========================================================================
+   Award sheet — category stickers
+=========================================================================== */
+.award-who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.award-who__avatar {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+  gap: 12px;
+}
+
+.cat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px 12px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--cat-color) 14%, white);
+  box-shadow: var(--sticker-ring), var(--shadow-sm);
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: transform var(--t-press) var(--ease-out), box-shadow var(--t-press) var(--ease-out);
+}
+
+.cat:nth-child(odd) {
+  rotate: -1deg;
+}
+
+.cat:nth-child(even) {
+  rotate: 1.2deg;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cat:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: var(--sticker-ring), var(--shadow-md);
+  }
+}
+
+.cat:active {
+  transform: scale(0.95);
+}
+
+.cat__emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.cat__label {
+  font-family: var(--font-display);
+  font-weight: 560;
+  font-size: 13.5px;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.cat__value {
+  position: absolute;
+  top: -7px;
+  right: -5px;
+  font-family: var(--font-display);
+  font-weight: 640;
+  font-size: 12px;
+  background: #fff;
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  box-shadow: 0 0 0 2px var(--cat-color);
+}
+
+.cat--gold {
+  background: color-mix(in srgb, var(--star) 28%, white);
+}
+
+/* ===========================================================================
+   Forms
+=========================================================================== */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.field label {
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.field input,
+.field select {
+  border: 2px solid var(--card-edge);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  background: var(--card);
+  transition: border-color var(--t-fast) ease;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+  gap: 6px;
+}
+
+.avatar-grid button {
+  font-size: 24px;
+  padding: 8px 0;
+  border-radius: var(--radius-md);
+  transition: background-color var(--t-fast) ease, transform var(--t-press) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .avatar-grid button:hover {
+    background: var(--paper);
+  }
+}
+
+.avatar-grid button:active {
+  transform: scale(0.9);
+}
+
+.avatar-grid button[aria-pressed="true"] {
+  background: var(--star);
+  box-shadow: inset 0 0 0 2px var(--star-deep);
+}
+
+/* ===========================================================================
+   Multi-select action bar
+=========================================================================== */
+.action-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-lg);
+  padding: 10px 12px 10px 20px;
+  z-index: 40;
+  animation: bar-in var(--t-med) var(--ease-out) backwards;
+  max-width: calc(100vw - 32px);
+}
+
+@keyframes bar-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+}
+
+.action-bar__count {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.action-bar .btn {
+  border: none;
+}
+
+.action-bar__link {
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: color var(--t-fast) ease, transform var(--t-press) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .action-bar__link:hover {
+    color: #fff;
+  }
+}
+
+.action-bar__link:active {
+  transform: scale(0.96);
+}
+
+/* ===========================================================================
+   Breakdown (student detail)
+=========================================================================== */
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 6px;
+}
+
+.breakdown__row {
+  display: grid;
+  grid-template-columns: 30px 1fr 44px;
+  align-items: center;
+  gap: 10px;
+}
+
+.breakdown__emoji {
+  font-size: 20px;
+  text-align: center;
+}
+
+.breakdown__bar {
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.breakdown__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--row-color, var(--star));
+  transition: width 500ms var(--ease-in-out);
+}
+
+.breakdown__num {
+  font-family: var(--font-display);
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  font-size: 14px;
+}
+
+/* ===========================================================================
+   Star Picker (slot-machine reel)
+=========================================================================== */
+.spinner {
+  text-align: center;
+  padding: 8px 0 4px;
+}
+
+.spinner__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  padding: 34px 20px;
+  margin-bottom: 18px;
+  min-height: 200px;
+  justify-content: center;
+}
+
+.spinner__avatar {
+  font-size: 74px;
+  line-height: 1;
+}
+
+.spinner__name {
+  font-family: var(--font-display);
+  font-weight: 640;
+  font-size: 30px;
+  min-height: 40px;
+}
+
+.spinner--spinning .spinner__avatar,
+.spinner--spinning .spinner__name {
+  filter: blur(1.5px);
+  opacity: 0.85;
+}
+
+.spinner--landed .spinner__avatar {
+  animation: winner-pop 500ms var(--ease-bounce);
+}
+
+@keyframes winner-pop {
+  40% {
+    transform: scale(1.3) rotate(4deg);
+  }
+}
+
+.spinner__hint {
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* ===========================================================================
+   Class picker (home)
+=========================================================================== */
+.picker {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.picker__hero {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.picker__logo {
+  font-size: 56px;
+  display: block;
+  animation: logo-swing 3s var(--ease-in-out) infinite alternate;
+}
+
+@keyframes logo-swing {
+  from {
+    transform: rotate(-6deg);
+  }
+  to {
+    transform: rotate(6deg);
+  }
+}
+
+.picker__title {
+  font-size: clamp(34px, 6vw, 48px);
+  font-weight: 640;
+  letter-spacing: -0.01em;
+  margin-top: 8px;
+}
+
+.picker__tag {
+  color: var(--ink-soft);
+  font-size: 17px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 18px;
+}
+
+.class-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--sticker-ring), var(--shadow-sm);
+  padding: 20px;
+  text-align: left;
+  transition: transform var(--t-press) var(--ease-out), box-shadow var(--t-press) var(--ease-out);
+  animation: card-in 320ms var(--ease-out) backwards;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .class-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sticker-ring), var(--shadow-md);
+  }
+}
+
+.class-card:active {
+  transform: scale(0.98);
+}
+
+.class-card__emoji {
+  font-size: 40px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.class-card__name {
+  font-family: var(--font-display);
+  font-weight: 620;
+  font-size: 20px;
+}
+
+.class-card__meta {
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.class-card--new {
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2.5px dashed var(--ink-soft);
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  min-height: 150px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .class-card--new:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+    box-shadow: none;
+    transform: none;
+  }
+}
+
+.picker__footer {
+  margin-top: 44px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ===========================================================================
+   Password gate (locked teacher board)
+=========================================================================== */
+.gate {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.gate__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--sticker-ring), var(--shadow-md);
+  padding: 36px 32px 28px;
+  width: 100%;
+  max-width: 400px;
+  animation: sheet-in var(--t-fast) var(--ease-out) backwards;
+}
+
+.gate__emoji {
+  font-size: 52px;
+  line-height: 1;
+}
+
+.gate__title {
+  font-size: 26px;
+  font-weight: 620;
+}
+
+.gate__sub {
+  color: var(--ink-soft);
+  font-size: 15px;
+  margin-bottom: 14px;
+}
+
+.gate__error {
+  color: var(--danger);
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.gate__links {
+  display: flex;
+  gap: 4px;
+  margin-top: 14px;
+}
+
+/* ===========================================================================
+   Display mode (projector view)
+=========================================================================== */
+.display .card {
+  padding: 26px 14px 20px;
+  gap: 10px;
+}
+
+.display .card__avatar {
+  font-size: 60px;
+  width: 96px;
+  height: 96px;
+}
+
+.display .card__name {
+  font-size: 22px;
+}
+
+.display .card__stars {
+  font-size: 21px;
+  padding: 4px 16px;
+}
+
+/* ===========================================================================
+   Easter eggs
+=========================================================================== */
+.trex {
+  position: fixed;
+  bottom: 10px;
+  left: -340px;
+  width: 320px;
+  z-index: 90;
+  pointer-events: none;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  animation: trex-stomp 14s linear forwards;
+}
+
+@keyframes trex-stomp {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(100vw + 680px));
+  }
+}
+
+.party-mode .grid {
+  animation: party-hue 3s linear infinite;
+}
+
+@keyframes party-hue {
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+.party-banner {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 620;
+  border-radius: var(--radius-pill);
+  padding: 10px 22px;
+  z-index: 95;
+  box-shadow: var(--shadow-lg);
+  animation: bar-in var(--t-med) var(--ease-out) backwards;
+}
+
+/* Celebration overlay (jar full) */
+.party-hero {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(42, 51, 82, 0.55);
+  z-index: 80;
+  animation: fade-in var(--t-med) ease backwards;
+  text-align: center;
+  padding: 24px;
+}
+
+.party-hero__title {
+  font-family: var(--font-display);
+  font-weight: 680;
+  font-size: clamp(38px, 8vw, 72px);
+  color: #fff;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  animation: pop-in 400ms var(--ease-bounce) backwards;
+}
+
+.party-hero__sub {
+  color: #ffe9b0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* ===========================================================================
+   Small screens
+=========================================================================== */
+@media (max-width: 560px) {
+  .header {
+    padding: 14px 16px 22px;
+  }
+
+  .header__title {
+    white-space: normal;
+    font-size: 19px;
+    line-height: 1.15;
+  }
+
+  .board,
+  .starjar {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+    gap: 12px;
+  }
+
+  .starjar__parties {
+    display: none;
+  }
+}
