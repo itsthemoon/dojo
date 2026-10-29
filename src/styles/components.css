@@ -927,6 +927,79 @@ button.card:active {
   margin-top: 6px;
 }
 
+.sync-btn {
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sync-btn:hover {
+  border-color: var(--ink-soft);
+  color: var(--ink);
+}
+
+.sync-note {
+  color: var(--ink-soft);
+  margin-bottom: 18px;
+}
+
+.sync-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.sync-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sync-code,
+.sync-input {
+  min-width: 0;
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.sync-warning {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.sync-divider {
+  margin: 20px 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  text-align: center;
+}
+
+.sync-error {
+  margin-top: 12px;
+  color: var(--danger);
+  font-size: 13px;
+}
+
 .class-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));

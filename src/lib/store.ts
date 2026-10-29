@@ -124,6 +124,7 @@ let state: AppState = loadState();
 let storageBroken = false;
 const listeners = new Set<() => void>();
 const celebrateListeners = new Set<(msg: CelebrateMessage) => void>();
+const persistListeners = new Set<(s: AppState) => void>();
 
 const channel: BroadcastChannel | null =
   typeof BroadcastChannel !== "undefined" ? new BroadcastChannel(CHANNEL_NAME) : null;
@@ -167,6 +168,7 @@ function persist(message: SyncMessage = { type: "sync" }) {
   }
   channel?.postMessage(message);
   emit();
+  persistListeners.forEach((cb) => cb(state));
 }
 
 function id(): string {
@@ -193,6 +195,12 @@ export function hasStorageError(): boolean {
 export function onCelebrate(cb: (msg: CelebrateMessage) => void): () => void {
   celebrateListeners.add(cb);
   return () => celebrateListeners.delete(cb);
+}
+
+/** Called after every local mutation; used by the encrypted sync adapter. */
+export function onPersist(cb: (s: AppState) => void): () => void {
+  persistListeners.add(cb);
+  return () => persistListeners.delete(cb);
 }
 
 // --- Selectors --------------------------------------------------------------
@@ -439,6 +447,42 @@ export function recordPick(classId: string, studentId: string) {
 export function resetPicks(classId: string) {
   state = { ...state, pickedStudentIds: { ...state.pickedStudentIds, [classId]: [] } };
   persist();
+}
+
+// --- Encrypted sync ----------------------------------------------------------
+
+/**
+ * Adopt a newer state from an encrypted cloud document. Returns false when the
+ * remote payload is stale or malformed. A remote write can update board data,
+ * but it can never remove or swap the password gate of a known class.
+ */
+export function adoptSyncedState(json: string, remoteRev: number): boolean {
+  if (!Number.isFinite(remoteRev) || remoteRev <= state.rev) return false;
+  try {
+    const next = normalizeState(JSON.parse(json));
+    const localHashes = new Map(
+      state.classes.filter((c) => c.passwordHash).map((c) => [c.id, c.passwordHash!])
+    );
+    next.classes = next.classes.map((c) => {
+      const local = localHashes.get(c.id);
+      return local && c.passwordHash !== local ? { ...c, passwordHash: local } : c;
+    });
+    state = { ...next, rev: remoteRev };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      storageBroken = true;
+    }
+    channel?.postMessage({ type: "sync" });
+    emit();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+if (typeof window !== "undefined" && import.meta.env.MODE !== "test") {
+  void import("./cloud").then((m) => m.initCloud()).catch(() => {});
 }
 
 // --- Tests -------------------------------------------------------------------

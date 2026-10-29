@@ -19,9 +19,11 @@ There are also a few secrets. Try typing a certain dinosaur's name, or the oldes
 
 ## How data is stored
 
-The app is **local-only**: everything lives in the browser's localStorage. It works offline, never talks to a server, and the projector view updates live from the teacher window on the same device.
+The app is **local-first**: everything lives in the browser's localStorage, so the projector view keeps working offline and on the same device.
 
-There is no cloud sync, no account, and no analytics. Student names and points never leave the device. To move a class, use the same browser profile; clearing site data removes the class.
+**Cloud sync is optional.** When you turn it on, this device creates a random 256-bit sync code. The class state is encrypted in the browser with AES-GCM before it is written to Firebase; Firestore only receives ciphertext, an IV, and a revision number. The document ID is derived from the sync code, and the database does not allow listing.
+
+To connect another device, enter the same sync code there. The code is a capability: anyone who has it can read and change the class data, so keep it private. There are no accounts, no email addresses, and no analytics. The Firebase web API key is a public client identifier; access control is the encrypted payload and the Firestore rules, not the key.
 
 ## Development
 
@@ -37,4 +39,4 @@ Built with Vite, React, and TypeScript. No CSS framework — the design system l
 
 ## Deployment
 
-Pushing to `main` builds and publishes `dist/` to the `gh-pages` branch via GitHub Actions (`.github/workflows/deploy.yml`). No secrets are required.
+Pushing to `main` builds and publishes `dist/` to the `gh-pages` branch via GitHub Actions (`.github/workflows/deploy.yml`). The workflow reads `VITE_FIREBASE_API_KEY` from the repository secret of the same name; without it the app builds in local-only mode. No key is committed.

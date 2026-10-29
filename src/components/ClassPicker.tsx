@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAppState } from "../hooks/useStore";
 import { hashPassword, markUnlocked } from "../lib/password";
 import { createClass, hasStorageError, studentsOf } from "../lib/store";
+import { CloudSync } from "./CloudSync";
 import { Modal } from "./Modal";
 
 const CLASS_EMOJI = ["🍎", "⭐", "🌈", "🚀", "🦉", "🐝", "🌻", "📚", "✏️", "🎨", "🧩", "🦖"];
@@ -22,6 +23,7 @@ export function ClassPicker({ onOpenClass }: ClassPickerProps) {
         </span>
         <h1 className="picker__title">Star Catcher</h1>
         <p className="picker__tag">Catch your students being awesome.</p>
+        <CloudSync />
       </div>
 
       {hasStorageError() && (

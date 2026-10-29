@@ -4,7 +4,7 @@ node_modules/
 # Build output
 dist/
 
-# Environment (legacy — the app no longer needs env vars)
+# Environment (Firebase web API key for cloud sync)
 .env
 .env.local
 
