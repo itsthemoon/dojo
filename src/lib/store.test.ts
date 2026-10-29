@@ -3,7 +3,6 @@ import {
   __resetForTests,
   addStudent,
   adjustPoints,
-  adoptCloudState,
   award,
   categoryBreakdown,
   classTotal,
@@ -150,68 +149,5 @@ describe("store", () => {
     // Picking the last remaining student starts a fresh round.
     recordPick(cls.id, b.id);
     expect(getState().pickedStudentIds[cls.id]).toEqual([]);
-  });
-
-  it("sanitizes malformed entries and settings from a cloud payload", () => {
-    const payload = JSON.stringify({
-      rev: 50,
-      classes: [{ id: "c1", name: "K", teacher: "T", emoji: "⭐", pointsEpoch: "bad", createdAt: 1 }],
-      students: [
-        { id: "s1", classId: "c1", name: "Ava", avatar: "🦄", createdAt: 1 },
-        { id: 42, classId: "c1" }, // dropped
-      ],
-      events: [
-        { id: "e1", classId: "c1", studentId: "s1", categoryId: "being-kind", delta: 1, ts: 5 },
-        { id: "e2", classId: "c1", studentId: "s1", delta: "NaN", ts: 6 }, // dropped
-      ],
-      pickedStudentIds: { c1: ["s1", 7] },
-      settings: { soundOn: "yes", starJarTarget: -3 },
-    });
-
-    expect(adoptCloudState(payload, 50)).toBe(true);
-
-    const s = getState();
-    expect(s.students).toHaveLength(1);
-    expect(s.events).toHaveLength(1);
-    expect(s.classes[0].pointsEpoch).toBe(0);
-    expect(s.pickedStudentIds.c1).toEqual(["s1"]);
-    expect(s.settings.soundOn).toBe(true);
-    expect(s.settings.starJarTarget).toBe(100);
-    expect(pointTotals("c1").get("s1")).toBe(1);
-  });
-
-  it("adopts newer cloud state and ignores stale or invalid payloads", () => {
-    const cls = createClass("K", "T", "⭐");
-    const a = addStudent(cls.id, "Ava", "🦄");
-    award(cls.id, [a.id], "being-kind");
-    const snapshot = JSON.stringify(getState());
-    const rev = getState().rev;
-
-    award(cls.id, [a.id], "being-kind"); // local moves ahead
-    expect(adoptCloudState(snapshot, rev)).toBe(false); // stale remote rejected
-    expect(pointTotals(cls.id).get(a.id)).toBe(2);
-
-    const remote = { ...JSON.parse(snapshot), rev: rev + 10 };
-    expect(adoptCloudState(JSON.stringify(remote), rev + 10)).toBe(true);
-    expect(pointTotals(cls.id).get(a.id)).toBe(1);
-    expect(getState().rev).toBe(rev + 10);
-
-    expect(adoptCloudState("not json", rev + 20)).toBe(false);
-  });
-
-  it("never lets a cloud write remove or swap a known class password", () => {
-    const cls = createClass("K", "T", "⭐", "pbkdf2$1$salt$realhash");
-    const stripped = {
-      ...JSON.parse(JSON.stringify(getState())),
-      rev: getState().rev + 10,
-      classes: getState().classes.map((c) => ({ ...c, passwordHash: "pbkdf2$1$evil$attackerhash" })),
-    };
-
-    expect(adoptCloudState(JSON.stringify(stripped), stripped.rev)).toBe(true);
-    expect(getState().classes.find((c) => c.id === cls.id)?.passwordHash).toBe("pbkdf2$1$salt$realhash");
-
-    const removed = { ...stripped, rev: stripped.rev + 1, classes: stripped.classes.map((c: Record<string, unknown>) => ({ ...c, passwordHash: undefined })) };
-    expect(adoptCloudState(JSON.stringify(removed), removed.rev)).toBe(true);
-    expect(getState().classes.find((c) => c.id === cls.id)?.passwordHash).toBe("pbkdf2$1$salt$realhash");
   });
 });

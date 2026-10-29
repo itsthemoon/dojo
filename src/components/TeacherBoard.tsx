@@ -207,8 +207,7 @@ export function TeacherBoard({ classId, onExit }: TeacherBoardProps) {
 
       {hasStorageError() && (
         <div className="storage-warning" role="alert">
-          ⚠️ Browser storage is full — changes may not stick on this device, but they still sync to the
-          cloud when it&rsquo;s reachable.
+          ⚠️ Browser storage is full — changes may not stick on this device.
         </div>
       )}
 

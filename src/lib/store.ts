@@ -39,8 +39,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 
 /**
  * Coerce anything JSON-shaped into a valid AppState. Used for localStorage
- * loads, backup imports, and cloud documents, so no malformed payload can
- * brick the app.
+ * loads, so no malformed payload can brick the app.
  */
 function normalizeState(parsed: unknown): AppState {
   const base = defaultState();
@@ -125,7 +124,6 @@ let state: AppState = loadState();
 let storageBroken = false;
 const listeners = new Set<() => void>();
 const celebrateListeners = new Set<(msg: CelebrateMessage) => void>();
-const persistListeners = new Set<(s: AppState) => void>();
 
 const channel: BroadcastChannel | null =
   typeof BroadcastChannel !== "undefined" ? new BroadcastChannel(CHANNEL_NAME) : null;
@@ -169,7 +167,6 @@ function persist(message: SyncMessage = { type: "sync" }) {
   }
   channel?.postMessage(message);
   emit();
-  persistListeners.forEach((cb) => cb(state));
 }
 
 function id(): string {
@@ -196,12 +193,6 @@ export function hasStorageError(): boolean {
 export function onCelebrate(cb: (msg: CelebrateMessage) => void): () => void {
   celebrateListeners.add(cb);
   return () => celebrateListeners.delete(cb);
-}
-
-/** Called after every local mutation; used by the cloud sync adapter. */
-export function onPersist(cb: (s: AppState) => void): () => void {
-  persistListeners.add(cb);
-  return () => persistListeners.delete(cb);
 }
 
 // --- Selectors --------------------------------------------------------------
@@ -448,46 +439,6 @@ export function recordPick(classId: string, studentId: string) {
 export function resetPicks(classId: string) {
   state = { ...state, pickedStudentIds: { ...state.pickedStudentIds, [classId]: [] } };
   persist();
-}
-
-// --- Cloud sync (optional, activates when Firebase is configured) ------------
-
-/**
- * Adopt a newer state from the cloud: persist locally without re-uploading.
- * Returns false when the remote payload is stale or invalid.
- */
-export function adoptCloudState(json: string, remoteRev: number): boolean {
-  if (!Number.isFinite(remoteRev) || remoteRev <= state.rev) return false;
-  try {
-    const next = normalizeState(JSON.parse(json));
-    // Local defense: a cloud write can update board data, but it can never
-    // remove or swap the password gate of a class this device already knows.
-    // (There is no change-password flow, so a differing remote hash is never
-    // legitimate.)
-    const localHashes = new Map(
-      state.classes.filter((c) => c.passwordHash).map((c) => [c.id, c.passwordHash!])
-    );
-    next.classes = next.classes.map((c) => {
-      const local = localHashes.get(c.id);
-      return local && c.passwordHash !== local ? { ...c, passwordHash: local } : c;
-    });
-    state = { ...next, rev: remoteRev };
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      storageBroken = true;
-    }
-    channel?.postMessage({ type: "sync" });
-    emit();
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-if (typeof window !== "undefined" && import.meta.env.MODE !== "test") {
-  // The Firebase SDK lives in a lazy chunk; nothing loads unless configured.
-  void import("./cloud").then((m) => m.startCloudSync()).catch(() => {});
 }
 
 // --- Tests -------------------------------------------------------------------

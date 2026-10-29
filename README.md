@@ -19,44 +19,9 @@ There are also a few secrets. Try typing a certain dinosaur's name, or the oldes
 
 ## How data is stored
 
-The app is **local-first**: everything lives in the browser's localStorage and the UI never waits on a network. It works offline and can never be "down". The projector view updates live from the teacher window on the same device.
+The app is **local-only**: everything lives in the browser's localStorage. It works offline, never talks to a server, and the projector view updates live from the teacher window on the same device.
 
-On top of that, **cloud sync** mirrors every change to a Firebase Firestore document, so the class survives cleared browsers and follows the teacher across devices — no manual backups needed.
-
-> The previous version used a Supabase backend; its free-tier project was paused
-> and deleted, which silently broke the live site. Firestore's free tier does not
-> pause, and even without it the app now works forever, locally.
-
-### Cloud sync setup (one time, ~3 minutes)
-
-1. Go to https://console.firebase.google.com → **Create a project** (name it anything, e.g. `star-catcher`; Analytics off is fine).
-2. In the project: **Build → Firestore Database → Create database** → Start in **production mode** → pick a US region.
-3. Firestore → **Rules** tab → replace with the following and **Publish** (these do not expire, unlike test mode). `get/create/update` only — no `list` (documents can't be enumerated) and no `delete`:
-
-   ```
-   rules_version = '2';
-   service cloud.firestore {
-     match /databases/{database}/documents {
-       match /boards/{board} {
-         allow get, create, update: if true;
-       }
-     }
-   }
-   ```
-
-### Trust model (read this once)
-
-There is no sign-in. Anyone who inspects this public site's source can technically reach the
-Firestore document and edit board data — the same trust model as the original Supabase version.
-The class password gates the *teacher UI* (kids at the smartboard, curious students), not the
-network; a device that already knows a class's password will also refuse any cloud update that
-tries to remove or change it. If real per-teacher accounts are ever needed, wire Firebase Auth
-and scope documents to `request.auth.uid`.
-
-4. Project settings (gear icon) → **Your apps** → Web (`</>`) → register an app (no hosting) → copy the `firebaseConfig` object.
-5. Paste it into `src/lib/firebase-config.ts` (replacing `null`), commit, push. The config values are public identifiers — safe to commit.
-
-While `firebaseConfig` is `null`, the Firebase SDK isn't even downloaded and the app is purely local.
+There is no cloud sync, no account, and no analytics. Student names and points never leave the device. To move a class, use the same browser profile; clearing site data removes the class.
 
 ## Development
 

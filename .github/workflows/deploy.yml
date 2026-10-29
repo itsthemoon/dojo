@@ -26,8 +26,16 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Privacy check
+        run: |
+          if grep -RInE 'AIza[0-9A-Za-z_-]{20,}|firebaseConfig|firestore' dist; then
+            echo "Cloud code or API key found in the build"
+            exit 1
+          fi
+
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: dist
+          clean: true

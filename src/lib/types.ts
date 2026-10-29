@@ -46,7 +46,7 @@ export interface Settings {
 
 export interface AppState {
   version: 2;
-  /** Monotonic revision, used for cloud sync conflict resolution. */
+  /** Monotonic revision, used to order state changes. */
   rev: number;
   classes: Classroom[];
   students: Student[];
